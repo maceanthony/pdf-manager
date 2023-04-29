@@ -29,9 +29,13 @@ for subdir, dirs, files in os.walk(root_folder):
                     writer.add_page(pdf.pages[page_num])
                 # get the parent folder name to use in the output file name
                 parent_folder = os.path.basename(os.path.normpath(subdir))
-                first_two_words = ' '.join(parent_folder.split()[:2])
+                split_at_comma = parent_folder.split(',')
+                last_names = split_at_comma[0]
+                first_name = (split_at_comma[1].strip(' ').split(' '))[0]
+                combined_name = last_names + ', ' + first_name
+                ##old method do not use first_two_words = ' '.join(parent_folder.split()[:2])
                 # write the first extracted PDF to disk with the folder name as a prefix
-                with open(os.path.join(subdir, f'DHS 11000 {first_two_words}.pdf'), 'wb') as output_file:
+                with open(os.path.join(subdir, f'DHS 11000 {combined_name}.pdf'), 'wb') as output_file:
                     writer.write(output_file)
                 # create a new PdfWriter object for the second extracted PDF
                 writer = PdfWriter()
@@ -39,5 +43,5 @@ for subdir, dirs, files in os.walk(root_folder):
                 for page_num in range(*page_range2):
                     writer.add_page(pdf.pages[page_num])
                 # write the second extracted PDF to disk with the folder name as a prefix
-                with open(os.path.join(subdir, f'BIRD {first_two_words}.pdf'), 'wb') as output_file:
+                with open(os.path.join(subdir, f'BIRD {combined_name}.pdf'), 'wb') as output_file:
                     writer.write(output_file)
