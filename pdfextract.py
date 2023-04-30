@@ -11,7 +11,8 @@ while count < 3:
     if password=='8595' and username=='admin':
         print('Access granted')
         # define the root folder where PDF files are located
-        root_folder = 'D:\pdf extract test'
+        root_folder = os.getcwd()
+        os.chdir( root_folder )
 
         # define the page ranges to extract from the PDF
         page_range1 = (17, 20)  # pages 18-20
