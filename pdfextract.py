@@ -40,7 +40,7 @@ while count < 3:
                         parent_folder = os.path.basename(os.path.normpath(subdir))
                         split_at_comma = parent_folder.split(',')
                         last_names = split_at_comma[0]
-                        first_name = (split_at_comma[1].strip(' ').split(' '))[0]
+                        first_name = (split_at_comma[1].strip(' ').split('-'))[0]
                         combined_name = last_names + ', ' + first_name
                         ##old method do not use first_two_words = ' '.join(parent_folder.split()[:2])
                         # write the first extracted PDF to disk with the folder name as a prefix
