@@ -3,8 +3,10 @@ import getpass
 import re
 from PyPDF2 import PdfReader, PdfWriter
 
+# request password from user
 print('Enter correct username and password combo to continue')
 count=0
+# three tries
 while count < 3:
     username = input('Enter username: ')
     password = input('Enter password: ')
@@ -62,13 +64,18 @@ while count < 3:
                         pdf = PdfReader(file)
                         # create a PdfWriter object to write the extracted PDFs
                         writer = PdfWriter()
+                        # check to make sure doc is longer than 6 pages
                         if len(pdf.pages) > 6:
+                            # skip first page and remaining pages to writer
                             for page_num in range(1, len(pdf.pages)):
                                 writer.add_page(pdf.pages[page_num])
+                            # write the page selection to disk
                             with open(os.path.join(subdir, f'FCRA.pdf'), 'wb') as output:
                                 writer.write(output)
+                            # print what we did
                             print(f"Removed page 1 from {subdir}.")
         break
     else:
+        # increase count on failed password
         print('Access denied. Try again.')
         count += 1
