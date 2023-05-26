@@ -79,3 +79,5 @@ while count < 3:
         # increase count on failed password
         print('Access denied. Try again.')
         count += 1
+
+input("Press enter to exit;")
