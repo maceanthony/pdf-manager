@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-import glob
 from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 from PIL import Image
 
