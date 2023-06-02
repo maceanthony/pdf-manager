@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from pypdf import PdfReader, PdfWriter, PdfMerger
 from PIL import Image
 
 # request password from user
@@ -184,7 +184,7 @@ if password_accepted == True:
                     print(f"Error converting image '{file}': {str(e)}")
 
     # fourth loop to check for citizenship type PDF's and combine them into one file
-    target_names = ['pp', 'lapr', 'nat', 'eac']
+    target_names = ['pp', 'lpr', 'nat', 'eac', 'lapr', 'lp']
 
     for subdir, dirs, files in os.walk(root_folder):
         # check against target_names to find files in subdirs
