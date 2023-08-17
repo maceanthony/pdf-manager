@@ -109,6 +109,7 @@ if password_accepted == True:
                     # DRT = Del Rio, Eagle Pass, Uvalde. RGV = RGV. Laredo = LRT.
 
                     # build a new variable for name based on middle initial using combined_name above
+                    # combined_name now uses middle name everywhere 08/16/2023
                     #first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
                     #middle_initial_name = f"{last_names}, {first_name_only} {' '.join(m[0] for m in middle_initials)}"
  
