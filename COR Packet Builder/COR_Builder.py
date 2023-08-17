@@ -80,8 +80,10 @@ if password_accepted == True:
                     # split and make name of file based on parent folder name
                     split_at_comma = parent_folder.split(',')
                     last_names = split_at_comma[0]
-                    first_middle_name = (split_at_comma[1].strip(' ').split(' -'))[0]
-                    combined_name = last_names + ', ' + first_middle_name
+                    first_name, *middle_name_parts = map(str.strip, split_at_comma[1].split(' -'))
+                    middle_initial = middle_name_parts[0][0] if middle_name_parts else ''
+                    combined_name = f"{last_names}, {first_name} {middle_initial}"
+
                     # old method do not use first_two_words = ' '.join(parent_folder.split()[:2])
                     # write the first extracted PDF to disk with the folder name as a prefix
                     with open(os.path.join(subdir, f'DHS 11000 {combined_name}.pdf'), 'wb') as output_file:
@@ -107,12 +109,12 @@ if password_accepted == True:
                     # DRT = Del Rio, Eagle Pass, Uvalde. RGV = RGV. Laredo = LRT.
 
                     # build a new variable for name based on middle initial using combined_name above
-                    first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
-                    middle_initial_name = f"{last_names}, {first_name_only} {' '.join(m[0] for m in middle_initials)}"
+                    #first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
+                    #middle_initial_name = f"{last_names}, {first_name_only} {' '.join(m[0] for m in middle_initials)}"
  
                     # LRT
                     if "Laredo" in parent_folder:
-                        COR_folder_name = middle_initial_name + " LRT COR"
+                        COR_folder_name = combined_name + " LRT COR"
                         new_folder_path = os.path.join(subdir, COR_folder_name)
 
                         try:
@@ -123,7 +125,7 @@ if password_accepted == True:
 
                     # RGV
                     if "RGV" in parent_folder:
-                        COR_folder_name = middle_initial_name + " RGV COR"
+                        COR_folder_name = combined_name + " RGV COR"
                         new_folder_path = os.path.join(subdir, COR_folder_name)
 
                         try:
@@ -132,7 +134,41 @@ if password_accepted == True:
                         except FileExistsError:
                             print(f"The folder {COR_folder_name} already exists.")
 
-                    # DRT
+                    # Eagle Pass
+                    if "Eagle Pass" in parent_folder:
+                        COR_folder_name = combined_name + " DRT-EGT COR"
+                        new_folder_path = os.path.join(subdir, COR_folder_name)
+
+                        try:
+                            os.mkdir(new_folder_path)
+                            print(f"New folder {COR_folder_name} created.")
+                        except FileExistsError:
+                            print(f"The folder {COR_folder_name} already exists.")
+                    
+                    # Uvalde
+                    if "Uvalde" in parent_folder:
+                        COR_folder_name = combined_name + " DRT-UVA COR"
+                        new_folder_path = os.path.join(subdir, COR_folder_name)
+
+                        try:
+                            os.mkdir(new_folder_path)
+                            print(f"New folder {COR_folder_name} created.")
+                        except FileExistsError:
+                            print(f"The folder {COR_folder_name} already exists.")
+
+                    # Del Rio
+                    if "Del Rio" in parent_folder:
+                        COR_folder_name = combined_name + " DRT-DRT COR"
+                        new_folder_path = os.path.join(subdir, COR_folder_name)
+
+                        try:
+                            os.mkdir(new_folder_path)
+                            print(f"New folder {COR_folder_name} created.")
+                        except FileExistsError:
+                            print(f"The folder {COR_folder_name} already exists.")
+
+                    # DRT - commented out, locations are separated above into 3 separate locations
+                    """
                     DRT_locations = ["Del Rio", "Eagle Pass", "Uvalde"]
 
                     if any(location in parent_folder for location in DRT_locations):
@@ -145,6 +181,7 @@ if password_accepted == True:
                             print(new_folder_path)
                         except FileExistsError:
                             print(f"The folder {COR_folder_name} already exists.")
+                    """
 
                     # copy the files to the newly created COR folder
                     #  - uses copy in case file already exists in the desination folder
