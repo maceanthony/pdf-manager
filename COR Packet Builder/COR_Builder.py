@@ -80,13 +80,16 @@ if password_accepted == True:
                     # split and make name of file based on parent folder name
                     split_at_comma = parent_folder.split(',')
                     last_names = split_at_comma[0]
-                    first_name, *middle_name_parts = map(str.strip, split_at_comma[1].split(' -'))
-                    middle_initial = middle_name_parts[0][0] if middle_name_parts else ''
-                    combined_name = f"{last_names}, {first_name} {middle_initial}"
+                    name_parts = map(str.strip, split_at_comma[1].split(' - '))
+                    first_name = name_parts[0]
+                    middle_initial = name_parts[1][0] if len(name_parts) > 1 else ''
+                    last_four_num = parent_folder[-4:]
+                    combined_name = f"{last_names}, {first_name} {middle_initial} {last_four_num}"
+                    combined_name_no_four = f"{last_names}, {first_name} {middle_initial}"
 
                     # old method do not use first_two_words = ' '.join(parent_folder.split()[:2])
                     # write the first extracted PDF to disk with the folder name as a prefix
-                    with open(os.path.join(subdir, f'DHS 11000 {combined_name}.pdf'), 'wb') as output_file:
+                    with open(os.path.join(subdir, f'DHS 11000 {combined_name_no_four}.pdf'), 'wb') as output_file:
                         writer.write(output_file)
                     # create a new PdfWriter object for the second extracted PDF
                     writer = PdfWriter()
@@ -94,13 +97,13 @@ if password_accepted == True:
                     for page_num in range(*page_range2):
                         writer.add_page(pdf.pages[page_num])
                     # write the second extracted PDF to disk with the folder name as a prefix
-                    with open(os.path.join(subdir, f'BIRD {combined_name}.pdf'), 'wb') as output_file:
+                    with open(os.path.join(subdir, f'BIRD {combined_name_no_four}.pdf'), 'wb') as output_file:
                         writer.write(output_file)
 
                     # assign the DHS file path to a variable for use in shutil
-                    file_path_DHS = os.path.join(subdir, f'DHS 11000 {combined_name}.pdf')
+                    file_path_DHS = os.path.join(subdir, f'DHS 11000 {combined_name_no_four}.pdf')
                     # assign the BIRD file path to a variable for use in shutil
-                    file_path_BIRD = os.path.join(subdir, f'BIRD {combined_name}.pdf')
+                    file_path_BIRD = os.path.join(subdir, f'BIRD {combined_name_no_four}.pdf')
                     # assign FCRA to a file path variable for shutil
                     file_path_FCRA = os.path.join(subdir, f'FCRA.pdf')
 
