@@ -4,6 +4,8 @@ import shutil
 from pypdf import PdfReader, PdfWriter, PdfMerger
 from PIL import Image
 
+# Version 1.1
+
 # request password from user
 print('Enter correct username and password combo to continue')
 count = 0
@@ -80,7 +82,7 @@ if password_accepted == True:
                     # split and make name of file based on parent folder name
                     split_at_comma = parent_folder.split(',')
                     last_names = split_at_comma[0]
-                    name_parts = map(str.strip, split_at_comma[1].split(' - '))
+                    name_parts = list(map(str.strip, split_at_comma[1].split(' - ')))
                     first_name = name_parts[0]
                     middle_initial = name_parts[1][0] if len(name_parts) > 1 else ''
                     last_four_num = parent_folder[-4:]
