@@ -29,44 +29,52 @@ if password_accepted == True:
     os.chdir( root_folder )
 
     # define the page ranges to extract from the PDF
-    page_range1 = (17, 20)  # pages 18-20
-    page_range2 = (20, 22)  # pages 21-22
+    page_range1 = (5, 8)  # pages 6-8
+    page_range2 = (1, 3)  # pages 2-3
+    page_range3 = (13, 14) # page 14
 
     # define the regex pattern to match against the file names
-    file_pattern = re.compile(r'(?i)^App\w*\.pdf$')
+    file_pattern = re.compile(r'(?i)^Please Sign your LUKE Application forms\w*\.pdf$')
+    merged_pattern = re.compile(r'(?i)^Merged App Dox -- .+\.pdf$')
     fcra_delete = re.compile(r'(?i)^FCRA\w*\.pdf$')
-
-    # loop over files to first see if there is an FCRA - the way this is written
-    # there needs to be two loops or it will see the app first and move the FCRA
-    # before it is edited
-    for subdir, dirs, files in os.walk(root_folder):
-        for file_name in files:
-            # check if the file is named FCRA
-            if fcra_delete.match(file_name):
-                # open the PDF in read mode
-                with open(os.path.join(subdir, file_name), 'rb') as file:
-                    # read PDF with pydf2
-                    pdf = PdfReader(file)
-                    # create a PdfWriter object to write the extracted PDFs
-                    writer = PdfWriter()
-                    
-                    # check to make sure doc is longer than 6 pages
-                    if len(pdf.pages) > 6:
-                        # skip first page and remaining pages to writer
-                        for page_num in range(1, len(pdf.pages)):
-                            writer.add_page(pdf.pages[page_num])
-                        # write the page selection to disk
-                        with open(os.path.join(subdir, f'FCRA.pdf'), 'wb') as output:
-                            writer.write(output)
-                        # print what we did
-                        parent_folder = os.path.basename(os.path.normpath(subdir))
-                        print(f"Removed page 1 from FCRA in {parent_folder}.")
-
+    fcra_certificate_pattern = re.compile(r'(?i)^Summary\w*\.pdf$')
+    dhs_file_pattern = re.compile(r'(?i)^DHS 11000\w*\.pdf$')
+    bird_file_pattern = re.compile(r'(?i)^BIRD\w*\.pdf$')
 
     # loop through all subfolders and files in the root folder
     for subdir, dirs, files in os.walk(root_folder):
         for file_name in files:
-            # check if the file is a PDF file named App.pdf
+            # check if there is a pdf matching pattern
+            if merged_pattern.match(file_name):
+                with open(os.path.join(subdir, file_name), 'rb') as file:
+                    parent_folder = os.path.basename(os.path.normpath(subdir))
+                    # Generate name and SSN logic
+                    split_at_comma = parent_folder.split(',')
+                    last_names = split_at_comma[0]
+                    first_middle_name = (split_at_comma[1].strip(' ').split(' -'))[0]
+                    first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
+                    middle_initial_name = f"{' '.join(m[0] for m in middle_initials)}"
+                    last_four_num = parent_folder[-4:]
+                    if last_four_num.isdigit():
+                        last_four_num = last_four_num
+                    else:
+                        last_four_num = 'XXXX'
+                    combined_name = f"{last_names}, {first_name_only} {middle_initial_name} {last_four_num}"
+                    combined_name_no_four = f"{last_names}, {first_name_only} {middle_initial_name}"
+
+                    pdf = PdfReader(file)
+                    writer = PdfWriter()
+                    # Extract the specified page range from the original PDF
+                    for page_num in range(page_range2[0], page_range2[1]):
+                        writer.add_page(pdf.pages[page_num])
+                    
+                    # Write the extracted pages to a new PDF named "BIRD {combined_name_no_four}.pdf"
+                    output_file_path = os.path.join(subdir, f'BIRD {combined_name_no_four}.pdf')
+                    with open(output_file_path, 'wb') as output_file:
+                        writer.write(output_file)
+
+                    print(f'Created new PDF: {output_file_path}')
+            # check if the file is a PDF file
             if file_pattern.match(file_name):
                 # open the PDF file in read mode
                 with open(os.path.join(subdir, file_name), 'rb') as file:
@@ -76,32 +84,42 @@ if password_accepted == True:
                     pdf = PdfReader(file)
                     # create a PdfWriter object to write the extracted PDFs
                     writer = PdfWriter()
-                    # extract the first page range and add to the writer
-                    for page_num in range(*page_range1):
-                        writer.add_page(pdf.pages[page_num])
-                    # split and make name of file based on parent folder name
+                    
+                    # Generate name and SSN logic
                     split_at_comma = parent_folder.split(',')
                     last_names = split_at_comma[0]
-                    name_parts = list(map(str.strip, split_at_comma[1].split(' - ')))
-                    first_name = name_parts[0]
-                    middle_initial = name_parts[1][0] if len(name_parts) > 1 else ''
+                    first_middle_name = (split_at_comma[1].strip(' ').split(' -'))[0]
+                    first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
+                    middle_initial_name = f"{' '.join(m[0] for m in middle_initials)}"
                     last_four_num = parent_folder[-4:]
-                    combined_name = f"{last_names}, {first_name} {middle_initial} {last_four_num}"
-                    combined_name_no_four = f"{last_names}, {first_name} {middle_initial}"
+                    if last_four_num.isdigit():
+                        last_four_num = last_four_num
+                    else:
+                        last_four_num = 'XXXX'
+                    combined_name = f"{last_names}, {first_name_only} {middle_initial_name} {last_four_num}"
+                    combined_name_no_four = f"{last_names}, {first_name_only} {middle_initial_name}"
 
-                    # old method do not use first_two_words = ' '.join(parent_folder.split()[:2])
-                    # write the first extracted PDF to disk with the folder name as a prefix
-                    with open(os.path.join(subdir, f'DHS 11000 {combined_name_no_four}.pdf'), 'wb') as output_file:
-                        writer.write(output_file)
-                    # create a new PdfWriter object for the second extracted PDF
-                    writer = PdfWriter()
-                    # extract the second page range and add to the writer
-                    for page_num in range(*page_range2):
+                    # Extract the specified page range from the original PDF
+                    for page_num in range(page_range1[0], page_range1[1]):
                         writer.add_page(pdf.pages[page_num])
-                    # write the second extracted PDF to disk with the folder name as a prefix
-                    with open(os.path.join(subdir, f'BIRD {combined_name_no_four}.pdf'), 'wb') as output_file:
+                    
+                    # Write the extracted pages to a new PDF named "BIRD {combined_name_no_four}.pdf"
+                    output_file_path = os.path.join(subdir, f'DHS 11000 {combined_name_no_four}.pdf')
+                    with open(output_file_path, 'wb') as output_file:
                         writer.write(output_file)
 
+                    print(f'Created new PDF: {output_file_path}')
+
+                    for page_num in range(page_range3[0], page_range3[1]):
+                        writer.add_page(pdf.pages[page_num])
+                    
+                    # Write the extracted pages to a new PDF named "BIRD {combined_name_no_four}.pdf"
+                    output_file_path = os.path.join(subdir, f'FCRA.pdf')
+                    with open(output_file_path, 'wb') as output_file:
+                        writer.write(output_file)
+
+                    print(f'Created new PDF: {output_file_path}')
+#
                     # assign the DHS file path to a variable for use in shutil
                     file_path_DHS = os.path.join(subdir, f'DHS 11000 {combined_name_no_four}.pdf')
                     # assign the BIRD file path to a variable for use in shutil
@@ -112,11 +130,6 @@ if password_accepted == True:
                     # make new folder to put items
                     # in format "Sanchez, Mary R LRT COR"
                     # DRT = Del Rio, Eagle Pass, Uvalde. RGV = RGV. Laredo = LRT.
-
-                    # build a new variable for name based on middle initial using combined_name above
-                    # combined_name now uses middle name everywhere 08/16/2023
-                    #first_name_only, *middle_initials = map(str.strip, first_middle_name.split(" "))
-                    #middle_initial_name = f"{last_names}, {first_name_only} {' '.join(m[0] for m in middle_initials)}"
  
                     # LRT
                     if "Laredo" in parent_folder:
@@ -164,7 +177,7 @@ if password_accepted == True:
 
                     # Del Rio
                     if "Del Rio" in parent_folder:
-                        COR_folder_name = combined_name + " DRT-DRT COR"
+                        COR_folder_name = combined_name + " DRT-DRS COR"
                         new_folder_path = os.path.join(subdir, COR_folder_name)
 
                         try:
